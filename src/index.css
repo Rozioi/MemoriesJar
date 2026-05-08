@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap");
+
+body {
+    background-color: #fdf2f8;
+    font-family: "Comfortaa", cursive;
+}
