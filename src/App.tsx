@@ -3,7 +3,7 @@ import confetti from "canvas-confetti";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { decodeMemories, encodeMemories } from "./utils/share";
-import { memories as defaultMemories, type IMemories } from "./memories";
+import { type IMemories } from "./memories";
 import { MemoryInput } from "./components/MemoryInput";
 
 import "./App.css";
