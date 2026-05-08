@@ -10,6 +10,7 @@ import "./App.css";
 
 function App() {
   const [allMemories, setAllMemories] = useState<IMemories[]>([]);
+  const [initialMemories, setInitialMemories] = useState<IMemories[]>([]);
   const [activeMemory, setActiveMemory] = useState<IMemories | null>(null);
   const [mode, setMode] = useState<"view" | "create">("view");
 
@@ -28,19 +29,20 @@ function App() {
       const decoded = decodeMemories(data);
       if (decoded && Array.isArray(decoded)) {
         setAllMemories(decoded);
-        console.log(decoded);
+        setInitialMemories(decoded); // Сохраняем копию
         setCountMemories(decoded.length);
         setMode("view");
         return;
       }
     }
-    setAllMemories(defaultMemories);
-    console.log(defaultMemories);
-
-    setCountMemories(defaultMemories.length);
     setMode("create");
   }, []);
 
+  const resetJar = () => {
+    setAllMemories(initialMemories);
+    setCountMemories(initialMemories.length);
+    setActiveMemory(null);
+  };
   // const showRandomMemory = () => {
   //   if (allMemories.length === 0) return;
   //   let nextMemory: IMemories;
@@ -126,62 +128,84 @@ function App() {
         </span>
       </motion.h1>
 
-      <div
-        className="relative cursor-pointer group flex flex-col items-center"
-        onClick={showNextMemory}
-      >
-        <div className="absolute inset-0 bg-magic-gold opacity-20 blur-2xl group-hover:opacity-40 transition-opacity rounded-full"></div>
-
-        <motion.div
-          whileHover={{ scale: 1.05, rotate: [0, -2, 2, 0] }}
-          whileTap={{ scale: 0.95 }}
-          className="relative text-9xl md:text-[12rem] select-none z-10"
+      {allMemories.length > 0 && (
+        <div
+          className="relative cursor-pointer group flex flex-col items-center"
+          onClick={showNextMemory}
         >
-          🫙
-          {Array.from({ length: Math.min(countMemories, 10) }).map(
-            (_, index) => (
-              <motion.span
-                key={index}
-                animate={{
-                  y: [0, -15, 0],
-                  x: [0, index % 2 === 0 ? 10 : -10, 0],
-                  opacity: [0.3, 0.8, 0.3],
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 2 + index * 0.2,
-                  delay: index * 0.1,
-                }}
-                className="absolute text-xl text-yellow-300"
-                style={{
-                  top: `${40 + ((index * 5) % 30)}%`,
-                  left: `${35 + ((index * 7) % 30)}%`,
-                }}
+          <div className="absolute inset-0 bg-magic-gold opacity-20 blur-2xl group-hover:opacity-40 transition-opacity rounded-full"></div>
+
+          <motion.div
+            whileHover={{ scale: 1.05, rotate: [0, -2, 2, 0] }}
+            whileTap={{ scale: 0.95 }}
+            className="relative text-9xl md:text-[12rem] select-none z-10"
+          >
+            🫙
+            {Array.from({ length: Math.min(countMemories, 10) }).map(
+              (_, index) => (
+                <motion.span
+                  key={index}
+                  animate={{
+                    y: [0, -15, 0],
+                    x: [0, index % 2 === 0 ? 10 : -10, 0],
+                    opacity: [0.3, 0.8, 0.3],
+                    scale: [1, 1.2, 1],
+                  }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 2 + index * 0.2,
+                    delay: index * 0.1,
+                  }}
+                  className="absolute text-xl text-yellow-300"
+                  style={{
+                    top: `${40 + ((index * 5) % 30)}%`,
+                    left: `${35 + ((index * 7) % 30)}%`,
+                  }}
+                >
+                  ✨
+                </motion.span>
+              ),
+            )}
+          </motion.div>
+
+          <AnimatePresence>
+            {countMemories > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                className="mt-4 px-4 py-1 bg-white/50 backdrop-blur-sm border border-white/20 rounded-full shadow-sm"
               >
-                ✨
-              </motion.span>
-            ),
-          )}
+                <span className="text-pink-600 font-bold text-sm tracking-widest">
+                  ОСТАЛОСЬ: {countMemories}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+      {mode === "view" && allMemories.length === 0 && !activeMemory && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center bg-white/30 backdrop-blur-md p-8 rounded-[2.5rem] border-2 border-white shadow-xl text-center"
+        >
+          <span className="text-6xl mb-4">🫙</span>
+          <h2 className="text-2xl font-bold text-pink-600 mb-2">
+            Баночка опустела!
+          </h2>
+          <p className="text-gray-600 mb-6 px-4">
+            Все моменты просмотрены, но чувства остаются навсегда...
+          </p>
+
+          <button
+            onClick={resetJar}
+            className="px-8 py-3 bg-pink-500 text-white font-bold rounded-full shadow-lg hover:bg-pink-600 transition-colors active:scale-95"
+          >
+            ✨ Посмотреть еще раз
+          </button>
         </motion.div>
-
-        <AnimatePresence>
-          {countMemories > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.5 }}
-              className="mt-4 px-4 py-1 bg-white/50 backdrop-blur-sm border border-white/20 rounded-full shadow-sm"
-            >
-              <span className="text-pink-600 font-bold text-sm tracking-widest">
-                ОСТАЛОСЬ: {countMemories}
-              </span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* ВСПЛЫВАЮЩЕЕ ВОСПОМИНАНИЕ */}
+      )}
       <AnimatePresence>
         {activeMemory && (
           <motion.div
@@ -201,7 +225,6 @@ function App() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                {/* Место для "подписи" внизу как на полароиде */}
                 <div className="mt-4 font-cute text-gray-400 text-sm italic">
                   Наш счастливый миг... ❤️
                 </div>
