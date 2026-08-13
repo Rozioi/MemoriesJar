@@ -16,7 +16,7 @@ function App() {
 
   const [isCreating, setIsCreating] = useState(false);
   const [newMemories, setNewMemories] = useState<IMemories[]>([
-    { id: 1, type: "text", content: "" },
+    { id: 1, type: "text", content: "", caption: "" },
   ]);
   const [generatedLink, setGeneratedLink] = useState("");
   const [countMemories, setCountMemories] = useState(0);
@@ -69,36 +69,19 @@ function App() {
     setAllMemories(updatedMemories);
     setCountMemories(updatedMemories.length);
   };
-  // const showNextMemory = () => {
-  //   if (allMemories.length === 0) return;
-
-  //   // Берем самое первое воспоминание из списка
-  //   const memoryToDisplay = allMemories[0];
-
-  //   // Устанавливаем его как активное
-  //   setActiveMemory(memoryToDisplay);
-
-  //   // Удаляем это воспоминание из общего списка
-  //   const updatedMemories = allMemories.slice(1);
-  //   setAllMemories(updatedMemories);
-
-  //   // Обновляем счетчик
-  //   setCountMemories(updatedMemories.length);
-  // };
   const addField = () =>
     setNewMemories([
       ...newMemories,
       { id: Date.now(), type: "text", content: "" },
     ]);
-  const updateField = (
-    id: number | string,
-    content: string,
-    type: "text" | "image",
-  ) => {
-    setNewMemories(
-      newMemories.map((m) => (m.id === id ? { ...m, content, type } : m)),
-    );
-  };
+const updateField = (
+  id: number | string,
+  updatedData: Partial<IMemories>
+) => {
+  setNewMemories((prev) =>
+    prev.map((m) => (m.id === id ? { ...m, ...updatedData } : m))
+  );
+};
 
   const removeField = (id: number | string) => {
     if (newMemories.length > 1)
@@ -217,23 +200,27 @@ function App() {
             className="absolute top-[20%] md:top-[15%] max-w-sm w-full bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-magic-gold z-10 flex flex-col items-center"
           >
             {activeMemory.type === "image" ? (
-              <div className="w-full bg-white p-3 pb-12 shadow-sm rotate-1 border border-gray-100 flex flex-col items-center">
-                <div className="w-full aspect-square overflow-hidden bg-gray-50 border border-gray-100 rounded-sm">
-                  <img
-                    src={activeMemory.content}
-                    alt="Moment"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="mt-4 font-cute text-gray-400 text-sm italic">
-                  Наш счастливый миг... ❤️
-                </div>
-              </div>
-            ) : (
-              <p className="text-xl text-gray-800 text-center font-bold italic font-cute py-8 px-4 leading-relaxed">
-                “ {activeMemory.content} ”
-              </p>
-            )}
+  <div className="w-full bg-white p-3 pb-8 shadow-sm rotate-1 border border-gray-100 flex flex-col items-center">
+    <div className="w-full aspect-square overflow-hidden bg-gray-50 border border-gray-100 rounded-sm">
+      <img
+        src={activeMemory.content}
+        alt="Moment"
+        className="w-full h-full object-cover"
+      />
+    </div>
+    
+    {/* Отображаем подпись, если она есть */}
+    {activeMemory.caption && (
+      <div className="mt-4 font-cute text-gray-600 text-base italic text-center px-2">
+        {activeMemory.caption}
+      </div>
+    )}
+  </div>
+) : (
+  <p className="text-xl text-gray-800 text-center font-bold italic font-cute py-8 px-4 leading-relaxed">
+    “ {activeMemory.content} ”
+  </p>
+)}
 
             <button
               onClick={(e) => {
@@ -292,12 +279,12 @@ function App() {
 
               <div className="mb-6">
                 {newMemories.map((m) => (
-                  <MemoryInput
-                    key={m.id}
-                    m={m}
-                    onUpdate={(val, type) => updateField(m.id, val, type)}
-                    onRemove={() => removeField(m.id)}
-                  />
+                 <MemoryInput
+                  key={m.id}
+  m={m}
+  onUpdate={(updatedData) => updateField(m.id, updatedData)}
+  onRemove={() => removeField(m.id)}
+/>
                 ))}
               </div>
 

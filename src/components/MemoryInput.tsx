@@ -8,7 +8,7 @@ export const MemoryInput = ({
   onRemove,
 }: {
   m: IMemories;
-  onUpdate: (val: string, type: "text" | "image") => void;
+  onUpdate: (data: Partial<IMemories>) => void;
   onRemove: () => void;
 }) => {
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,8 @@ export const MemoryInput = ({
       setLoading(true);
       try {
         const url = await uploadImage(e.target.files[0]);
-        onUpdate(url, "image");
+        // Меняем тип на image и сохраняем ссылку в content
+        onUpdate({ content: url, type: "image" });
       } catch (err) {
         alert("Не удалось загрузить фото");
       } finally {
@@ -29,35 +30,59 @@ export const MemoryInput = ({
 
   return (
     <div className="flex flex-col gap-2 mb-4 p-3 bg-pink-50 rounded-2xl border border-pink-100">
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={m.type === "text" ? m.content : "Фото загружено ✅"}
-          disabled={m.type === "image"}
-          onChange={(e) => onUpdate(e.target.value, "text")}
-          placeholder="Текст воспоминания..."
-          className="flex-1 px-4 py-2 rounded-xl outline-none font-cute text-sm"
-        />
-        <button onClick={onRemove} className="text-pink-300 px-2">
-          ×
-        </button>
-      </div>
+      {/* Если это обычный текст */}
+      {m.type === "text" ? (
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={m.content}
+            onChange={(e) => onUpdate({ content: e.target.value, type: "text" })}
+            placeholder="Текст воспоминания..."
+            className="flex-1 px-4 py-2 rounded-xl outline-none font-cute text-sm"
+          />
+          <button onClick={onRemove} className="text-pink-300 px-2 hover:text-pink-500">
+            ×
+          </button>
+        </div>
+      ) : (
+        /* Если это загруженное фото */
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <img
+                src={m.content}
+                alt="Превью"
+                className="w-12 h-12 object-cover rounded-lg border border-pink-200"
+              />
+              <span className="text-xs text-pink-500 font-bold">Фото загружено ✅</span>
+            </div>
+            <button onClick={onRemove} className="text-pink-300 px-2 hover:text-pink-500">
+              ×
+            </button>
+          </div>
 
-      <label className="text-[10px] text-pink-400 cursor-pointer hover:text-pink-600 transition flex items-center gap-1">
-        <input
-          type="file"
-          className="hidden"
-          onChange={handleFileChange}
-          accept="image/*"
-        />
-        {loading ? "⌛ Загрузка..." : "📷 Прикрепить фото вместо текста"}
-      </label>
+          {/* ПОЛЕ ВВОДА ПОДПИСИ */}
+          <input
+            type="text"
+            value={m.caption || ""}
+            onChange={(e) => onUpdate({ caption: e.target.value })}
+            placeholder="Подпись к фото (необязательно)..."
+            className="w-full px-4 py-2 rounded-xl outline-none font-cute text-sm bg-white/80 border border-pink-100 focus:border-pink-300"
+          />
+        </div>
+      )}
 
-      {m.type === "image" && (
-        <img
-          src={m.content}
-          className="w-12 h-12 object-cover rounded-lg mt-1"
-        />
+      {/* Кнопка загрузки для переключения в режим фото */}
+      {m.type === "text" && (
+        <label className="text-[10px] text-pink-400 cursor-pointer hover:text-pink-600 transition flex items-center gap-1 self-start">
+          <input
+            type="file"
+            className="hidden"
+            onChange={handleFileChange}
+            accept="image/*"
+          />
+          {loading ? "⌛ Загрузка..." : "📷 Прикрепить фото вместо текста"}
+        </label>
       )}
     </div>
   );

@@ -2,6 +2,7 @@ export interface IMemories {
   id: number;
   type: "text" | "image";
   content: string;
+  caption?: string;
 }
 export const memories: IMemories[] = [
   { id: 1, type: "text", content: "Твоя улыбка в тот день..." },
