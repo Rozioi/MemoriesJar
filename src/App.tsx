@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
 import { DEFAULT_COVER, isSharedMemoryJar, type ICoverSettings } from "./cover";
+import { BackgroundMusicInput } from "./components/BackgroundMusicInput";
 import { CoverCustomizer } from "./components/CoverCustomizer";
 import { MemoryCover } from "./components/MemoryCover";
 import { MemoryInput } from "./components/MemoryInput";
+import { SoundCloudPlayer } from "./components/SoundCloudPlayer";
 import { type IMemories } from "./memories";
+import { type IBackgroundTrack } from "./music";
 import { decodeMemories, encodeMemories } from "./utils/share";
 import "./App.css";
 
@@ -19,6 +22,7 @@ function App() {
     { id: 1, type: "text", content: "", caption: "" },
   ]);
   const [cover, setCover] = useState<ICoverSettings>(DEFAULT_COVER);
+  const [music, setMusic] = useState<IBackgroundTrack | undefined>();
   const [generatedLink, setGeneratedLink] = useState("");
   const [countMemories, setCountMemories] = useState(0);
 
@@ -43,6 +47,7 @@ function App() {
       setAllMemories(decoded.memories);
       setInitialMemories(decoded.memories);
       setCover(decoded.cover);
+      setMusic(decoded.music);
       setCountMemories(decoded.memories.length);
       setMode("view");
       return;
@@ -103,7 +108,7 @@ function App() {
       return;
     }
 
-    const payload = { memories: filtered, cover };
+    const payload = { memories: filtered, cover, music };
     const link = `${window.location.origin}${window.location.pathname}?data=${encodeMemories(payload)}`;
     setGeneratedLink(link);
 
@@ -185,9 +190,18 @@ function App() {
                 )}
               </div>
             ) : (
-              <p className="text-xl text-gray-800 text-center font-bold italic font-cute py-8 px-4 leading-relaxed">
-                “ {activeMemory.content} ”
-              </p>
+              <div
+                className="w-full min-h-48 rounded-[1.6rem] border-2 p-7 shadow-sm flex items-center justify-center"
+                style={{
+                  backgroundColor: activeMemory.cardColor || "#ffffff",
+                  borderColor: cover.color,
+                  boxShadow: `0 12px 28px ${cover.color}24`,
+                }}
+              >
+                <p className="text-xl text-gray-800 text-center font-bold italic font-cute leading-relaxed">
+                  “ {activeMemory.content} ”
+                </p>
+              </div>
             )}
             <button
               onClick={(event) => {
@@ -201,6 +215,8 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {mode === "view" && <SoundCloudPlayer track={music} color={cover.color} />}
 
       {mode === "view" && (
         <button
@@ -248,6 +264,10 @@ function App() {
               <p className="text-sm text-gray-500 mb-5">Сначала оформи её, потом добавь тёплые моменты.</p>
 
               <CoverCustomizer cover={cover} onChange={setCover} />
+
+              <div className="mb-5">
+                <BackgroundMusicInput track={music} onChange={setMusic} />
+              </div>
 
               <div className="mb-6">
                 <p className="text-sm font-bold text-pink-700 mb-3">Воспоминания</p>

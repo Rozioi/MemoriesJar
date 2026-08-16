@@ -1,4 +1,5 @@
 import type { IMemories } from "./memories";
+import { isBackgroundTrack, type IBackgroundTrack } from "./music";
 
 export type CoverType = "jar" | "box" | "postcard";
 export type StickerStyle = string;
@@ -14,6 +15,7 @@ export interface ICoverSettings {
 export interface ISharedMemoryJar {
   memories: IMemories[];
   cover: ICoverSettings;
+  music?: IBackgroundTrack;
 }
 
 export const DEFAULT_COVER: ICoverSettings = {
@@ -123,16 +125,16 @@ export const isCoverSettings = (value: unknown): value is ICoverSettings => {
     (cover.type === "jar" || cover.type === "box" || cover.type === "postcard") &&
     typeof cover.color === "string" &&
     (cover.title === undefined || typeof cover.title === "string") &&
-    (cover.sticker === "hearts" ||
-      cover.sticker === "stars" ||
-      cover.sticker === "flowers" ||
-      cover.sticker === "sparkles" ||
-      cover.sticker === "none")
+    typeof cover.sticker === "string"
   );
 };
 
 export const isSharedMemoryJar = (value: unknown): value is ISharedMemoryJar => {
   if (!value || typeof value !== "object") return false;
   const jar = value as Partial<ISharedMemoryJar>;
-  return Array.isArray(jar.memories) && isCoverSettings(jar.cover);
+  return (
+    Array.isArray(jar.memories) &&
+    isCoverSettings(jar.cover) &&
+    (jar.music === undefined || isBackgroundTrack(jar.music))
+  );
 };
