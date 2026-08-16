@@ -6,6 +6,10 @@ type SoundCloudWidget = {
   bind: (event: string, listener: () => void) => void;
   toggle: () => void;
   setVolume: (volume: number) => void;
+  getCurrentSound: (callback: (sound: { title?: string; artwork_url?: string } | null) => void) => void;
+  seekTo: (seek: number) => void;
+  play: () => void;
+
 };
 
 type SoundCloudApi = {
@@ -37,25 +41,41 @@ export const SoundCloudPlayer = ({ track, color }: SoundCloudPlayerProps) => {
   const widgetRef = useRef<SoundCloudWidget | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!track) return;
 
     setIsReady(false);
     setIsPlaying(false);
+    setArtworkUrl(null);
     widgetRef.current = null;
 
     const initialiseWidget = () => {
       if (!iframeRef.current || !window.SC?.Widget) return;
       const widget = window.SC.Widget(iframeRef.current);
       widgetRef.current = widget;
+
       widget.bind(window.SC.Widget.Events.READY, () => {
         widget.setVolume(62);
         setIsReady(true);
+
+        // Получаем данные о треке strictly ВНУТРИ события READY
+        widget.getCurrentSound((sound) => {
+          if (sound?.artwork_url) {
+            // Преобразуем превью в картинку высокого разрешения (500x500)
+            const highRes = sound.artwork_url.replace("-large", "-t500x500");
+            setArtworkUrl(highRes);
+          }
+        });
       });
+
       widget.bind(window.SC.Widget.Events.PLAY, () => setIsPlaying(true));
       widget.bind(window.SC.Widget.Events.PAUSE, () => setIsPlaying(false));
-      widget.bind(window.SC.Widget.Events.FINISH, () => setIsPlaying(false));
+     widget.bind(window.SC.Widget.Events.FINISH, () => {
+  widget.seekTo(0); 
+  widget.play();   
+});
     };
 
     const existingScript = document.getElementById(WIDGET_SCRIPT_ID) as HTMLScriptElement | null;
@@ -81,8 +101,8 @@ export const SoundCloudPlayer = ({ track, color }: SoundCloudPlayerProps) => {
 
   const playerUrl = new URL("https://w.soundcloud.com/player/");
   playerUrl.searchParams.set("url", track.url);
-  playerUrl.searchParams.set("auto_play", "false");
-  playerUrl.searchParams.set("show_artwork", "false");
+  playerUrl.searchParams.set("auto_play", "true");
+  playerUrl.searchParams.set("show_artwork", "true");
   playerUrl.searchParams.set("show_comments", "false");
   playerUrl.searchParams.set("show_playcount", "false");
   playerUrl.searchParams.set("show_user", "false");
@@ -110,9 +130,13 @@ export const SoundCloudPlayer = ({ track, color }: SoundCloudPlayerProps) => {
         title="Фоновая музыка из SoundCloud"
       />
       <div className="soundcloud-corner__card">
-        <span className={`soundcloud-corner__note ${isPlaying ? "soundcloud-corner__note--playing" : ""}`} aria-hidden="true">
-          ♪
-        </span>
+        {artworkUrl ? (
+          <img src={artworkUrl} alt="" className="soundcloud-corner__artwork" />
+        ) : (
+          <span className={`soundcloud-corner__note ${isPlaying ? "soundcloud-corner__note--playing" : ""}`} aria-hidden="true">
+            ♪
+          </span>
+        )}
         <div className="soundcloud-corner__copy">
           <span>Музыка для этой капсулы</span>
           <strong>{track.title?.trim() || "Трек из SoundCloud"}</strong>

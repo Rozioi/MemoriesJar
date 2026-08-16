@@ -2,9 +2,10 @@
   --track-color: #f472b6;
   position: fixed;
   z-index: 35;
-  right: max(1rem, env(safe-area-inset-right));
-  bottom: max(1rem, env(safe-area-inset-bottom));
-  width: min(22rem, calc(100vw - 2rem));
+  /* right: max(3rem, env(safe-area-inset-right)); */
+  bottom: max(3rem, env(safe-area-inset-bottom));
+  width: calc(100vw - 3rem);
+
   animation: soundcloud-card-in 520ms 260ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
 }
 
@@ -24,9 +25,18 @@
   padding: 0.62rem 0.68rem;
   border: 1px solid color-mix(in srgb, var(--track-color) 38%, #fff);
   border-radius: 1.05rem;
+  margin: auto;
+
   background: linear-gradient(135deg, rgb(255 255 255 / 0.92), color-mix(in srgb, var(--track-color) 15%, #fff));
   box-shadow: 0 14px 32px color-mix(in srgb, var(--track-color) 29%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.82);
   backdrop-filter: blur(14px);
+}
+.soundcloud-corner__artwork {
+    width: 3.15rem;
+    height: 3.15rem;
+      border-radius: 0.72rem;
+
+  
 }
 
 .soundcloud-corner__note {
@@ -54,7 +64,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.3rem;
-  min-height: 2.15rem;
+  min-height: 3.15rem;
   padding: 0.48rem 0.62rem;
   border: 0;
   border-radius: 0.72rem;
@@ -83,10 +93,10 @@
 }
 
 @media (max-width: 480px) {
-  .soundcloud-corner { right: max(0.7rem, env(safe-area-inset-right)); bottom: max(0.7rem, env(safe-area-inset-bottom)); width: min(19rem, calc(100vw - 1.4rem)); }
+  .soundcloud-corner { right: max(0.7rem, env(safe-area-inset-right)); bottom: max(0.7rem, env(safe-area-inset-bottom)); width: min(95rem, calc(100vw - 1.4rem)); }
   .soundcloud-corner__card { gap: 0.5rem; padding: 0.5rem; border-radius: 0.92rem; }
   .soundcloud-corner__note { width: 1.92rem; border-radius: 0.65rem; font-size: 1.05rem; }
-  .soundcloud-corner__button { min-height: 1.92rem; padding: 0.42rem 0.5rem; }
+  .soundcloud-corner__button { min-height: 3.15rem; padding: 0.42rem 0.5rem; font-size: 0.7rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,6 +1,7 @@
 export interface IBackgroundTrack {
   url: string;
   title?: string;
+  artworkUrl?: string;
 }
 
 export const isSoundCloudUrl = (value: string): boolean => {

@@ -167,6 +167,7 @@ function App() {
       <AnimatePresence>
         {activeMemory && (
           <motion.div
+          onClick={() => showNextMemory()}
             key={activeMemory.id}
             initial={{ opacity: 0, scale: 0, y: 50, rotate: -15 }}
             animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
