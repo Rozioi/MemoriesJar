@@ -51,6 +51,9 @@ export const COVER_OPTIONS: Array<{
 
 export const COLOR_OPTIONS = [
   "#f472b6",
+  "#f6b5c7",
+  "#2f2622",
+  "#a57d85",
   "#a78bfa",
   "#60a5fa",
   "#34d399",
