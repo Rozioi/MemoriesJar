@@ -288,7 +288,7 @@ function App() {
 
       <p className="absolute bottom-4 text-[10px] text-gray-400">Сделано с любовью</p>
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(6)].map((_, index) => (
+        {[...Array(10)].map((_, index) => (
           <motion.span
             key={index}
             initial={{ y: "110vh", x: `${Math.random() * 100}vw`, opacity: 0 }}

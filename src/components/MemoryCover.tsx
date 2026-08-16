@@ -49,12 +49,12 @@ export const MemoryCover = ({
 
       {stickers.length > 0 && (
         <div className="memory-cover__stickers" aria-hidden="true">
-          {[0, 1, 2].map((row) => (
+          {[0, 1, 2, 3, 4].map((row) => (
             <div
               className={`memory-cover__sticker-row memory-cover__sticker-row--${row + 1}`}
               key={row}
             >
-              {Array.from({ length: 6 }).map((_, index) => (
+              {Array.from({ length: 8 }).map((_, index) => (
                 <span key={index}>{stickers[(row + index) % stickers.length]}</span>
               ))}
             </div>

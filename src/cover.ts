@@ -1,7 +1,7 @@
 import type { IMemories } from "./memories";
 
 export type CoverType = "jar" | "box" | "postcard";
-export type StickerStyle = "hearts" | "stars" | "flowers" | "sparkles" | "none";
+export type StickerStyle = string;
 
 export interface ICoverSettings {
   type: CoverType;
@@ -66,9 +66,47 @@ export const STICKER_OPTIONS: Array<{
   stickers: string[];
 }> = [
   { id: "hearts", title: "Сердечки", stickers: ["♥", "♡", "♥"] },
-  { id: "stars", title: "Звёзды", stickers: ["★", "✦", "★"] },
-  { id: "flowers", title: "Цветы", stickers: ["✿", "✽", "✿"] },
-  { id: "sparkles", title: "Искры", stickers: ["✧", "✦", "✧"] },
+{ id: "pink-hearts", title: "Розовые сердечки", stickers: ["💗", "💖", "💗"] },
+{ id: "love", title: "Любовь", stickers: ["💘", "💞", "💝"] },
+{ id: "kisses", title: "Поцелуи", stickers: ["💋", "♡", "💋"] },
+{ id: "bows", title: "Бантики", stickers: ["🎀", "୨୧", "🎀"] },
+{ id: "cute", title: "Милота", stickers: ["૮", "◡", "ა"] },
+{ id: "teddy", title: "Мишки", stickers: ["🧸", "♡", "🧸"] },
+{ id: "bunnies", title: "Кролики", stickers: ["🐰", "♡", "🐇"] },
+{ id: "cats", title: "Котики", stickers: ["🐱", "ฅ", "🐈"] },
+{ id: "paws", title: "Лапки", stickers: ["🐾", "♡", "🐾"] },
+{ id: "stars", title: "Звёзды", stickers: ["★", "✦", "★"] },
+{ id: "sparkles", title: "Искры", stickers: ["✧", "✦", "✧"] },
+{ id: "moon", title: "Луна", stickers: ["☾", "✦", "☽"] },
+{ id: "space", title: "Космос", stickers: ["🌙", "⭐", "🪐"] },
+{ id: "galaxy", title: "Галактика", stickers: ["🌌", "✦", "🪐"] },
+{ id: "magic", title: "Магия", stickers: ["✨", "🔮", "✨"] },
+{ id: "fairy", title: "Феи", stickers: ["🧚", "✨", "🧚"] },
+{ id: "clouds", title: "Облачка", stickers: ["☁️", "☁︎", "☁️"] },
+{ id: "rainbow", title: "Радуга", stickers: ["🌈", "✨", "🌈"] },
+{ id: "computer", title: "Компьютеры", stickers: ["🖥️", "⌨️", "🖥️"] },
+{ id: "laptop", title: "Ноутбуки", stickers: ["💻", "⌨️", "💻"] },
+{ id: "phone", title: "Телефоны", stickers: ["📱", "♡", "📱"] },
+{ id: "tablet", title: "Планшеты", stickers: ["📱", "✦", "📱"] },
+{ id: "keyboard", title: "Клавиатура", stickers: ["⌨️", "⌨", "⌨️"] },
+{ id: "mouse", title: "Мышки", stickers: ["🖱️", "✦", "🖱️"] },
+{ id: "code", title: "Код", stickers: ["</>", "{ }", "</>"] },
+{ id: "terminal", title: "Терминал", stickers: [">_", "⌁", ">_"] },
+{ id: "github", title: "GitHub", stickers: ["◉", "⌘", "◉"] },
+{ id: "wifi", title: "Интернет", stickers: ["📶", "🌐", "📶"] },
+{ id: "cloud-tech", title: "Облако", stickers: ["☁️", "</>", "☁️"] },
+{ id: "robot", title: "Роботы", stickers: ["🤖", "⚙️", "🤖"] },
+{ id: "settings", title: "Техника", stickers: ["⚙️", "🔧", "⚙️"] },
+{ id: "flowers", title: "Цветы", stickers: ["✿", "✽", "✿"] },
+{ id: "daisies", title: "Ромашки", stickers: ["🌼", "✿", "🌼"] },
+{ id: "roses", title: "Розы", stickers: ["🌹", "♡", "🌹"] },
+{ id: "sunflowers", title: "Подсолнухи", stickers: ["🌻", "☀", "🌻"] },
+{ id: "leaves", title: "Листья", stickers: ["🍃", "❧", "🍃"] },
+{ id: "mushrooms", title: "Грибочки", stickers: ["🍄", "🌿", "🍄"] },
+{ id: "cherries", title: "Вишенки", stickers: ["🍒", "♡", "🍒"] },
+{ id: "strawberries", title: "Клубника", stickers: ["🍓", "♡", "🍓"] },
+{ id: "butterflies", title: "Бабочки", stickers: ["🦋", "✿", "🦋"] },
+{ id: "bees", title: "Пчёлки", stickers: ["🐝", "🌼", "🐝"] },
   { id: "none", title: "Без стикеров", stickers: [] },
 ];
 
