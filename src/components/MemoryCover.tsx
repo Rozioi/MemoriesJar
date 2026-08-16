@@ -24,6 +24,13 @@ export const MemoryCover = ({
 }: MemoryCoverProps) => {
   const stickers = getStickerCharacters(cover.sticker);
   const hasImage = Boolean(cover.imageUrl);
+  const fallbackTitle =
+    cover.type === "jar"
+      ? "Наши моменты"
+      : cover.type === "box"
+        ? "Тебе с любовью"
+        : "Для тебя";
+  const displayTitle = cover.title?.trim() || fallbackTitle;
   const style = {
     "--cover-color": cover.color,
     "--cover-image": cover.imageUrl ? `url("${cover.imageUrl}")` : "none",
@@ -35,7 +42,7 @@ export const MemoryCover = ({
         interactive ? "memory-cover--interactive" : ""
       } ${hasImage ? "memory-cover--has-image" : ""}`}
       style={style}
-      aria-label={`Обложка в формате «${cover.type}». Воспоминаний: ${count}`}
+      aria-label={`Обложка «${displayTitle}» в формате «${cover.type}». Воспоминаний: ${count}`}
     >
       <div className="memory-cover__backdrop" aria-hidden="true" />
       <div className="memory-cover__light" aria-hidden="true" />
@@ -70,8 +77,8 @@ export const MemoryCover = ({
             <span className="cover-jar__shine" />
             <span className="cover-jar__glow" />
             <div className="cover-jar__label">
-              <span>moments</span>
-              <strong>для нас</strong>
+              <span>капсула воспоминаний</span>
+              <strong>{displayTitle}</strong>
             </div>
             <span className="cover-jar__heart">♥</span>
             <span className="cover-jar__heart cover-jar__heart--small">♥</span>
@@ -88,8 +95,8 @@ export const MemoryCover = ({
             <div className="cover-box__ribbon cover-box__ribbon--vertical" />
             <div className="cover-box__ribbon cover-box__ribbon--horizontal" />
             <div className="cover-box__tag">
-              <span>for you</span>
-              <strong>♥</strong>
+              <span>подарок</span>
+              <strong>{displayTitle}</strong>
             </div>
           </div>
           <div className="cover-box__lid">
@@ -114,7 +121,7 @@ export const MemoryCover = ({
             <span className="cover-postcard__line cover-postcard__line--1" />
             <span className="cover-postcard__line cover-postcard__line--2" />
             <span className="cover-postcard__line cover-postcard__line--3" />
-            <span className="cover-postcard__signature">для тебя</span>
+            <span className="cover-postcard__signature">{displayTitle}</span>
           </div>
         </div>
       )}
