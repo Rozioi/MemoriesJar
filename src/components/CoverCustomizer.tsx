@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import {
   COLOR_OPTIONS,
   COVER_OPTIONS,
@@ -37,8 +37,16 @@ export const CoverCustomizer = ({ cover, onChange }: CoverCustomizerProps) => {
     }
   };
 
+  const customizerStyle = {
+    "--active-cover-color": cover.color,
+  } as CSSProperties;
+
   return (
-    <section className="cover-customizer" aria-labelledby="cover-settings-title">
+    <section
+      className="cover-customizer"
+      style={customizerStyle}
+      aria-labelledby="cover-settings-title"
+    >
       <div className="cover-customizer__heading">
         <div>
           <p className="cover-customizer__eyebrow">Сделай по-своему</p>

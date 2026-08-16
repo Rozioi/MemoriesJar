@@ -465,6 +465,48 @@
   .cover-photo-control__actions { justify-content: flex-start; }
 }
 
+/* The selected cover color now also drives the material, labels and editor cards. */
+.memory-cover {
+  --cover-deep: color-mix(in srgb, var(--cover-color) 82%, #21102f);
+  --cover-soft: color-mix(in srgb, var(--cover-color) 44%, #fff);
+  --cover-pale: color-mix(in srgb, var(--cover-color) 13%, #fffafc);
+  --cover-accent: color-mix(in srgb, var(--cover-color) 76%, #fff);
+  background: linear-gradient(145deg, var(--cover-soft), var(--cover-deep));
+}
+.memory-cover--postcard { background: linear-gradient(145deg, var(--cover-pale), color-mix(in srgb, var(--cover-color) 31%, #fff)); }
+.memory-cover__light { background: color-mix(in srgb, var(--cover-color) 18%, #fff); }
+.memory-cover__footer { background: color-mix(in srgb, var(--cover-color) 54%, #160b2b); border-color: color-mix(in srgb, var(--cover-color) 28%, #fff); }
+.cover-jar__lid { border-bottom-color: color-mix(in srgb, var(--cover-color) 45%, #fff); }
+.cover-jar__neck { background: linear-gradient(90deg, color-mix(in srgb, var(--cover-color) 22%, #fff), rgb(218 212 233 / 0.15), color-mix(in srgb, var(--cover-color) 28%, #fff)); }
+.cover-jar__glass { border-color: color-mix(in srgb, var(--cover-color) 23%, #fff); }
+.cover-jar__label { border-color: color-mix(in srgb, var(--cover-color) 38%, #fff); box-shadow: 0 4px 12px color-mix(in srgb, var(--cover-color) 22%, transparent); }
+.cover-box__body { border-color: color-mix(in srgb, var(--cover-color) 27%, #fff); }
+.cover-box__lid { border-color: color-mix(in srgb, var(--cover-color) 31%, #fff); }
+.cover-box__ribbon, .cover-box__lid-ribbon { background: linear-gradient(90deg, color-mix(in srgb, var(--cover-color) 34%, #fff), #fff 48%, color-mix(in srgb, var(--cover-color) 55%, #fff)); }
+.cover-box__tag { border-color: color-mix(in srgb, var(--cover-color) 46%, #fff); background: linear-gradient(145deg, #fff, var(--cover-pale)); }
+.cover-postcard__paper { border-color: color-mix(in srgb, var(--cover-color) 42%, #8a6250); background: linear-gradient(145deg, #fffdf8, var(--cover-pale)); }
+.cover-postcard__paper::before { border-color: color-mix(in srgb, var(--cover-color) 51%, #fff); }
+.cover-postcard__photo { background-color: color-mix(in srgb, var(--cover-color) 36%, #fff); }
+.cover-postcard__line { background: color-mix(in srgb, var(--cover-color) 68%, #fff); }
+.cover-customizer { border-color: color-mix(in srgb, var(--active-cover-color) 38%, #fbcfe8); background: linear-gradient(145deg, color-mix(in srgb, var(--active-cover-color) 8%, #fff), color-mix(in srgb, var(--active-cover-color) 13%, #faf5ff)); }
+.cover-editor-preview { border-color: color-mix(in srgb, var(--active-cover-color) 43%, #fbcfe8); background: linear-gradient(145deg, color-mix(in srgb, var(--active-cover-color) 10%, #fff), color-mix(in srgb, var(--active-cover-color) 19%, #fce7f3)); }
+.cover-title-control { border-color: color-mix(in srgb, var(--active-cover-color) 38%, #fbcfe8); background: color-mix(in srgb, var(--active-cover-color) 5%, #fff); }
+.cover-title-control__input:focus { border-color: var(--active-cover-color); box-shadow: 0 0 0 3px color-mix(in srgb, var(--active-cover-color) 20%, transparent); }
+
+/* Touch devices have a visible tap response and continuous, battery-friendly ambient motion. */
+@media (hover: none) and (pointer: coarse) and (prefers-reduced-motion: no-preference) {
+  .memory-cover--interactive { -webkit-tap-highlight-color: transparent; }
+  .memory-cover--interactive:active { transform: translateY(-3px) scale(0.975); box-shadow: 0 17px 34px color-mix(in srgb, var(--cover-color) 38%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.72); }
+  .memory-cover--interactive .cover-jar { animation: jar-breathe 4.6s ease-in-out infinite; }
+  .memory-cover--interactive .cover-box { animation: box-breathe 4.9s ease-in-out infinite; }
+  .memory-cover--interactive .cover-postcard { animation: postcard-breathe 5.1s ease-in-out infinite; }
+  .memory-cover--interactive .memory-cover__light { animation: light-drift 5.7s ease-in-out infinite alternate; }
+  .memory-cover--interactive .memory-cover__sticker-row { animation-duration: 4.7s; }
+  .memory-cover--interactive:active .cover-object { animation-play-state: paused; }
+  .memory-cover--interactive:active .memory-cover__light,
+  .memory-cover--interactive:active .memory-cover__sticker-row { animation-play-state: paused; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .memory-cover, .memory-cover *, .cover-choice, .cover-upload-button { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }
