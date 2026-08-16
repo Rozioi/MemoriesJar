@@ -44,7 +44,23 @@ export const CoverCustomizer = ({ cover, onChange }: CoverCustomizerProps) => {
           <p className="cover-customizer__eyebrow">Сделай по-своему</p>
           <h3 id="cover-settings-title">Настрой обложку</h3>
         </div>
-        <span className="cover-customizer__badge">4 шага</span>
+        <span className="cover-customizer__badge">5 шагов</span>
+      </div>
+
+      <div className="cover-control-group cover-title-control">
+        <div className="cover-title-control__heading">
+          <p className="cover-control-group__label">1. Название</p>
+          <span>{(cover.title || "").length}/34</span>
+        </div>
+        <input
+          type="text"
+          value={cover.title || ""}
+          onChange={(event) => changeCover({ title: event.target.value.slice(0, 34) })}
+          placeholder="Например, «Наши счастливые дни»"
+          maxLength={34}
+          className="cover-title-control__input"
+        />
+        <p className="cover-title-control__hint">Оно появится на баночке, подарке или открытке.</p>
       </div>
 
       <div className="cover-editor-preview" aria-live="polite">
@@ -56,7 +72,7 @@ export const CoverCustomizer = ({ cover, onChange }: CoverCustomizerProps) => {
       </div>
 
       <div className="cover-control-group">
-        <p className="cover-control-group__label">1. Формат</p>
+        <p className="cover-control-group__label">2. Формат</p>
         <div className="cover-choice-grid">
           {COVER_OPTIONS.map((option) => (
             <button
@@ -77,7 +93,7 @@ export const CoverCustomizer = ({ cover, onChange }: CoverCustomizerProps) => {
       </div>
 
       <div className="cover-control-group">
-        <p className="cover-control-group__label">2. Цвет</p>
+        <p className="cover-control-group__label">3. Цвет</p>
         <div className="cover-colors" role="list" aria-label="Палитра обложки">
           {COLOR_OPTIONS.map((color) => (
             <button
@@ -106,7 +122,7 @@ export const CoverCustomizer = ({ cover, onChange }: CoverCustomizerProps) => {
       </div>
 
       <div className="cover-control-group">
-        <p className="cover-control-group__label">3. Диагональные стикеры</p>
+        <p className="cover-control-group__label">4. Диагональные стикеры</p>
         <div className="cover-sticker-options">
           {STICKER_OPTIONS.map((option) => (
             <button
@@ -127,7 +143,7 @@ export const CoverCustomizer = ({ cover, onChange }: CoverCustomizerProps) => {
 
       <div className="cover-control-group cover-photo-control">
         <div>
-          <p className="cover-control-group__label">4. Фото для обложки</p>
+          <p className="cover-control-group__label">5. Фото для обложки</p>
           <p className="cover-photo-control__hint">
             Необязательно. Фото станет фоном и сохранится в ссылке.
           </p>

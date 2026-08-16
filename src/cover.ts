@@ -7,6 +7,7 @@ export interface ICoverSettings {
   type: CoverType;
   color: string;
   sticker: StickerStyle;
+  title?: string;
   imageUrl?: string;
 }
 
@@ -19,6 +20,7 @@ export const DEFAULT_COVER: ICoverSettings = {
   type: "jar",
   color: "#f472b6",
   sticker: "hearts",
+  title: "",
 };
 
 export const COVER_OPTIONS: Array<{
@@ -79,6 +81,7 @@ export const isCoverSettings = (value: unknown): value is ICoverSettings => {
   return (
     (cover.type === "jar" || cover.type === "box" || cover.type === "postcard") &&
     typeof cover.color === "string" &&
+    (cover.title === undefined || typeof cover.title === "string") &&
     (cover.sticker === "hearts" ||
       cover.sticker === "stars" ||
       cover.sticker === "flowers" ||
