@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
-
-import { motion, AnimatePresence } from "framer-motion";
-import { decodeMemories, encodeMemories } from "./utils/share";
-import { type IMemories } from "./memories";
+import { AnimatePresence, motion } from "framer-motion";
+import { DEFAULT_COVER, isSharedMemoryJar, type ICoverSettings } from "./cover";
+import { CoverCustomizer } from "./components/CoverCustomizer";
+import { MemoryCover } from "./components/MemoryCover";
 import { MemoryInput } from "./components/MemoryInput";
-
+import { type IMemories } from "./memories";
+import { decodeMemories, encodeMemories } from "./utils/share";
 import "./App.css";
 
 function App() {
@@ -13,28 +14,40 @@ function App() {
   const [initialMemories, setInitialMemories] = useState<IMemories[]>([]);
   const [activeMemory, setActiveMemory] = useState<IMemories | null>(null);
   const [mode, setMode] = useState<"view" | "create">("view");
-
   const [isCreating, setIsCreating] = useState(false);
   const [newMemories, setNewMemories] = useState<IMemories[]>([
     { id: 1, type: "text", content: "", caption: "" },
   ]);
+  const [cover, setCover] = useState<ICoverSettings>(DEFAULT_COVER);
   const [generatedLink, setGeneratedLink] = useState("");
   const [countMemories, setCountMemories] = useState(0);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const data = params.get("data");
-
-    if (data) {
-      const decoded = decodeMemories(data);
-      if (decoded && Array.isArray(decoded)) {
-        setAllMemories(decoded);
-        setInitialMemories(decoded); // Сохраняем копию
-        setCountMemories(decoded.length);
-        setMode("view");
-        return;
-      }
+    if (!data) {
+      setMode("create");
+      return;
     }
+
+    const decoded = decodeMemories(data);
+    if (Array.isArray(decoded)) {
+      setAllMemories(decoded as IMemories[]);
+      setInitialMemories(decoded as IMemories[]);
+      setCountMemories(decoded.length);
+      setMode("view");
+      return;
+    }
+
+    if (isSharedMemoryJar(decoded)) {
+      setAllMemories(decoded.memories);
+      setInitialMemories(decoded.memories);
+      setCover(decoded.cover);
+      setCountMemories(decoded.memories.length);
+      setMode("view");
+      return;
+    }
+
     setMode("create");
   }, []);
 
@@ -43,14 +56,6 @@ function App() {
     setCountMemories(initialMemories.length);
     setActiveMemory(null);
   };
-  // const showRandomMemory = () => {
-  //   if (allMemories.length === 0) return;
-  //   let nextMemory: IMemories;
-  //   do {
-  //     nextMemory = allMemories[Math.floor(Math.random() * allMemories.length)];
-  //   } while (nextMemory === activeMemory && allMemories.length > 1);
-  //   setActiveMemory(nextMemory);
-  // };
 
   const showNextMemory = () => {
     if (allMemories.length === 0) return;
@@ -59,7 +64,7 @@ function App() {
       particleCount: 40,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ["#ff69b4", "#ff1493", "#ffffff"],
+      colors: [cover.color, "#ffffff", "#fde68a"],
       shapes: ["circle"],
     });
 
@@ -69,126 +74,91 @@ function App() {
     setAllMemories(updatedMemories);
     setCountMemories(updatedMemories.length);
   };
-  const addField = () =>
-    setNewMemories([
-      ...newMemories,
+
+  const addField = () => {
+    setNewMemories((previous) => [
+      ...previous,
       { id: Date.now(), type: "text", content: "" },
     ]);
-const updateField = (
-  id: number | string,
-  updatedData: Partial<IMemories>
-) => {
-  setNewMemories((prev) =>
-    prev.map((m) => (m.id === id ? { ...m, ...updatedData } : m))
-  );
-};
+  };
+
+  const updateField = (id: number | string, updatedData: Partial<IMemories>) => {
+    setNewMemories((previous) =>
+      previous.map((memory) =>
+        memory.id === id ? { ...memory, ...updatedData } : memory,
+      ),
+    );
+  };
 
   const removeField = (id: number | string) => {
-    if (newMemories.length > 1)
-      setNewMemories(newMemories.filter((m) => m.id !== id));
+    if (newMemories.length > 1) {
+      setNewMemories((previous) => previous.filter((memory) => memory.id !== id));
+    }
   };
 
-  const handleGenerate = () => {
-    const filtered = newMemories.filter((m) => m.content.trim() !== "");
-    if (filtered.length === 0)
-      return alert("Добавь хотя бы одно воспоминание!");
+  const handleGenerate = async () => {
+    const filtered = newMemories.filter((memory) => memory.content.trim() !== "");
+    if (filtered.length === 0) {
+      alert("Добавь хотя бы одно воспоминание!");
+      return;
+    }
 
-    const link = `${window.location.origin}${window.location.pathname}?data=${encodeMemories(filtered)}`;
+    const payload = { memories: filtered, cover };
+    const link = `${window.location.origin}${window.location.pathname}?data=${encodeMemories(payload)}`;
     setGeneratedLink(link);
-    navigator.clipboard.writeText(link);
+
+    try {
+      await navigator.clipboard.writeText(link);
+    } catch {
+      // Ссылка остаётся видимой в интерфейсе, если браузер запретил доступ к буферу.
+    }
   };
+
+  const isEmpty = mode === "view" && allMemories.length === 0 && !activeMemory;
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-brand-pink to-brand-purple flex flex-col items-center justify-center p-4 relative overflow-hidden font-cute text-gray-800">
       <motion.h1
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-3xl md:text-4xl font-bold text-center mb-12 drop-shadow-sm px-4"
+        className="text-3xl md:text-4xl font-bold text-center mb-8 drop-shadow-sm px-4"
       >
-        {mode === "view" ? "Баночка наших " : "Создай свою баночку "}
-        <span className="text-pink-500 block sm:inline">
-          счастливых моментов ✨
-        </span>
+        {mode === "view" ? "Капсула наших " : "Создай свою капсулу "}
+        <span className="text-pink-500 block sm:inline">счастливых моментов</span>
       </motion.h1>
 
       {allMemories.length > 0 && (
-        <div
-          className="relative cursor-pointer group flex flex-col items-center"
+        <button
+          type="button"
+          className="relative cursor-pointer group flex flex-col items-center focus:outline-none focus-visible:ring-4 focus-visible:ring-white/70 rounded-[2rem]"
           onClick={showNextMemory}
+          aria-label="Открыть следующее воспоминание"
         >
-          <div className="absolute inset-0 bg-magic-gold opacity-20 blur-2xl group-hover:opacity-40 transition-opacity rounded-full"></div>
-
-          <motion.div
-            whileHover={{ scale: 1.05, rotate: [0, -2, 2, 0] }}
-            whileTap={{ scale: 0.95 }}
-            className="relative text-9xl md:text-[12rem] select-none z-10"
-          >
-            🫙
-            {Array.from({ length: Math.min(countMemories, 10) }).map(
-              (_, index) => (
-                <motion.span
-                  key={index}
-                  animate={{
-                    y: [0, -15, 0],
-                    x: [0, index % 2 === 0 ? 10 : -10, 0],
-                    opacity: [0.3, 0.8, 0.3],
-                    scale: [1, 1.2, 1],
-                  }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 2 + index * 0.2,
-                    delay: index * 0.1,
-                  }}
-                  className="absolute text-xl text-yellow-300"
-                  style={{
-                    top: `${40 + ((index * 5) % 30)}%`,
-                    left: `${35 + ((index * 7) % 30)}%`,
-                  }}
-                >
-                  ✨
-                </motion.span>
-              ),
-            )}
-          </motion.div>
-
-          <AnimatePresence>
-            {countMemories > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                className="mt-4 px-4 py-1 bg-white/50 backdrop-blur-sm border border-white/20 rounded-full shadow-sm"
-              >
-                <span className="text-pink-600 font-bold text-sm tracking-widest">
-                  ОСТАЛОСЬ: {countMemories}
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+          <div className="absolute inset-0 bg-magic-gold opacity-20 blur-2xl group-hover:opacity-40 transition-opacity rounded-full" />
+          <MemoryCover cover={cover} count={countMemories} interactive />
+        </button>
       )}
-      {mode === "view" && allMemories.length === 0 && !activeMemory && (
+
+      {isEmpty && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center bg-white/30 backdrop-blur-md p-8 rounded-[2.5rem] border-2 border-white shadow-xl text-center"
         >
-          <span className="text-6xl mb-4">🫙</span>
-          <h2 className="text-2xl font-bold text-pink-600 mb-2">
-            Баночка опустела!
-          </h2>
+          <MemoryCover cover={cover} count={initialMemories.length} />
+          <h2 className="text-2xl font-bold text-pink-600 mt-6 mb-2">Все моменты открыты!</h2>
           <p className="text-gray-600 mb-6 px-4">
-            Все моменты просмотрены, но чувства остаются навсегда...
+            Воспоминания закончились, но чувства остаются навсегда.
           </p>
-
           <button
             onClick={resetJar}
             className="px-8 py-3 bg-pink-500 text-white font-bold rounded-full shadow-lg hover:bg-pink-600 transition-colors active:scale-95"
           >
-            ✨ Посмотреть еще раз
+            Посмотреть ещё раз
           </button>
         </motion.div>
       )}
+
       <AnimatePresence>
         {activeMemory && (
           <motion.div
@@ -197,39 +167,36 @@ const updateField = (
             animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
             exit={{ opacity: 0, scale: 0.5, y: -100, rotate: 15 }}
             transition={{ type: "spring", stiffness: 100, damping: 15 }}
-            className="absolute top-[20%] md:top-[15%] max-w-sm w-full bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-magic-gold z-10 flex flex-col items-center"
+            className="absolute top-[20%] md:top-[15%] max-w-sm w-[calc(100%-2rem)] bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-magic-gold z-20 flex flex-col items-center"
           >
             {activeMemory.type === "image" ? (
-  <div className="w-full bg-white p-3 pb-8 shadow-sm rotate-1 border border-gray-100 flex flex-col items-center">
-    <div className="w-full aspect-square overflow-hidden bg-gray-50 border border-gray-100 rounded-sm">
-      <img
-        src={activeMemory.content}
-        alt="Moment"
-        className="w-full h-full object-cover"
-      />
-    </div>
-    
-    {/* Отображаем подпись, если она есть */}
-    {activeMemory.caption && (
-      <div className="mt-4 font-cute text-gray-600 text-base italic text-center px-2">
-        {activeMemory.caption}
-      </div>
-    )}
-  </div>
-) : (
-  <p className="text-xl text-gray-800 text-center font-bold italic font-cute py-8 px-4 leading-relaxed">
-    “ {activeMemory.content} ”
-  </p>
-)}
-
+              <div className="w-full bg-white p-3 pb-8 shadow-sm rotate-1 border border-gray-100 flex flex-col items-center">
+                <div className="w-full aspect-square overflow-hidden bg-gray-50 border border-gray-100 rounded-sm">
+                  <img
+                    src={activeMemory.content}
+                    alt={activeMemory.caption || "Воспоминание"}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {activeMemory.caption && (
+                  <div className="mt-4 font-cute text-gray-600 text-base italic text-center px-2">
+                    {activeMemory.caption}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-xl text-gray-800 text-center font-bold italic font-cute py-8 px-4 leading-relaxed">
+                “ {activeMemory.content} ”
+              </p>
+            )}
             <button
-              onClick={(e) => {
-                e.stopPropagation();
+              onClick={(event) => {
+                event.stopPropagation();
                 setActiveMemory(null);
               }}
               className="mt-4 text-sm text-gray-400 hover:text-pink-500 transition font-cute underline"
             >
-              Закрыть [x]
+              Закрыть
             </button>
           </motion.div>
         )}
@@ -240,9 +207,9 @@ const updateField = (
           onClick={() => {
             window.location.href = window.location.pathname;
           }}
-          className="mt-12 text-pink-400 hover:text-pink-600 transition text-sm underline"
+          className="mt-8 text-pink-500 hover:text-pink-700 transition text-sm underline relative z-20"
         >
-          Хочу создать свою такую баночку ✨
+          Создать свою капсулу
         </button>
       )}
 
@@ -250,9 +217,9 @@ const updateField = (
         <motion.button
           whileHover={{ scale: 1.05 }}
           onClick={() => setIsCreating(true)}
-          className="mt-12 px-8 py-3 bg-white text-pink-500 font-bold rounded-full shadow-lg hover:shadow-pink-200 transition"
+          className="mt-5 px-8 py-3 bg-white text-pink-500 font-bold rounded-full shadow-lg hover:shadow-pink-200 transition"
         >
-          ✨ Наполнить баночку
+          Настроить и наполнить
         </motion.button>
       )}
 
@@ -267,74 +234,69 @@ const updateField = (
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
-              className="bg-white w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl relative max-h-[90vh] overflow-y-auto"
+              className="bg-white w-full max-w-md p-6 md:p-8 rounded-[2rem] shadow-2xl relative max-h-[90vh] overflow-y-auto"
             >
               <button
+                type="button"
                 onClick={() => setIsCreating(false)}
-                className="absolute top-6 right-6 text-gray-400"
+                className="absolute top-5 right-5 text-gray-400 hover:text-pink-500 text-2xl leading-none"
+                aria-label="Закрыть"
               >
                 ×
               </button>
-              <h2 className="text-2xl font-bold mb-6">Наполни баночку ✨</h2>
+              <h2 className="text-2xl font-bold mb-1 pr-8">Твоя капсула</h2>
+              <p className="text-sm text-gray-500 mb-5">Сначала оформи её, потом добавь тёплые моменты.</p>
+
+              <CoverCustomizer cover={cover} onChange={setCover} />
 
               <div className="mb-6">
-                {newMemories.map((m) => (
-                 <MemoryInput
-                  key={m.id}
-  m={m}
-  onUpdate={(updatedData) => updateField(m.id, updatedData)}
-  onRemove={() => removeField(m.id)}
-/>
+                <p className="text-sm font-bold text-pink-700 mb-3">Воспоминания</p>
+                {newMemories.map((memory) => (
+                  <MemoryInput
+                    key={memory.id}
+                    m={memory}
+                    onUpdate={(updatedData) => updateField(memory.id, updatedData)}
+                    onRemove={() => removeField(memory.id)}
+                  />
                 ))}
               </div>
 
               <button
+                type="button"
                 onClick={addField}
-                className="w-full py-2 border-2 border-dashed border-pink-100 rounded-xl text-pink-300 hover:border-pink-300 hover:text-pink-400 transition mb-6"
+                className="w-full py-2 border-2 border-dashed border-pink-100 rounded-xl text-pink-400 hover:border-pink-300 hover:text-pink-500 transition mb-5"
               >
                 + Ещё момент
               </button>
-
               <button
+                type="button"
                 onClick={handleGenerate}
                 className="w-full py-4 bg-gradient-to-r from-pink-400 to-purple-400 text-white font-bold rounded-2xl shadow-lg active:scale-95 transition"
               >
-                {generatedLink
-                  ? "Ссылка скопирована! ✅"
-                  : "Получить ссылку ❤️"}
+                {generatedLink ? "Ссылка обновлена и скопирована" : "Получить ссылку"}
               </button>
-
               {generatedLink && (
-                <p className="mt-4 text-[10px] text-gray-400 break-all text-center">
-                  Отправь её тому самому человеку
-                </p>
+                <div className="mt-4 rounded-xl bg-pink-50 p-3 text-center">
+                  <p className="text-xs text-pink-700 font-bold">Готово — ссылка скопирована.</p>
+                  <p className="mt-1 text-[10px] text-gray-500 break-all">Отправь её тому, для кого сделана капсула.</p>
+                </div>
               )}
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <p className="absolute bottom-4 text-[10px] text-gray-400">
-        Сделано с любовью ❤️
-      </p>
+      <p className="absolute bottom-4 text-[10px] text-gray-400">Сделано с любовью</p>
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(6)].map((_, i) => (
+        {[...Array(6)].map((_, index) => (
           <motion.span
-            key={i}
+            key={index}
             initial={{ y: "110vh", x: `${Math.random() * 100}vw`, opacity: 0 }}
-            animate={{
-              y: "-10vh",
-              opacity: [0, 0.3, 0],
-              rotate: 360,
-            }}
-            transition={{
-              duration: 10 + Math.random() * 15,
-              repeat: Infinity,
-              delay: i * 2,
-            }}
+            animate={{ y: "-10vh", opacity: [0, 0.3, 0], rotate: 360 }}
+            transition={{ duration: 10 + Math.random() * 15, repeat: Infinity, delay: index * 2 }}
             className="absolute text-white/20 text-3xl"
           >
-            ❤️
+            ♥
           </motion.span>
         ))}
       </div>

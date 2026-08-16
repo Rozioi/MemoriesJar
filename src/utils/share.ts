@@ -1,20 +1,17 @@
 import LZString from "lz-string";
-import type { IMemories } from "../memories";
 
-// Функция для превращения массива воспоминаний в короткую строку для URL
-export const encodeMemories = (memoriesArray: IMemories[]) => {
-  const jsonString = JSON.stringify(memoriesArray);
+export const encodeMemories = (payload: unknown): string => {
+  const jsonString = JSON.stringify(payload);
   return LZString.compressToEncodedURIComponent(jsonString);
 };
 
-// Функция для превращения строки из URL обратно в массив
-export const decodeMemories = (encodedString: string) => {
+export const decodeMemories = (encodedString: string): unknown => {
   try {
-    const decompressed =
-      LZString.decompressFromEncodedURIComponent(encodedString);
+    const decompressed = LZString.decompressFromEncodedURIComponent(encodedString);
+    if (!decompressed) return null;
     return JSON.parse(decompressed);
-  } catch (e) {
-    console.error("Ошибка декодирования:", e);
+  } catch (error) {
+    console.error("Ошибка декодирования:", error);
     return null;
   }
 };
