@@ -6,6 +6,7 @@ import {
   type ICoverSettings,
 } from "../cover";
 import { uploadImage } from "../utils/upload";
+import { MemoryCover } from "./MemoryCover";
 
 type CoverCustomizerProps = {
   cover: ICoverSettings;
@@ -44,6 +45,14 @@ export const CoverCustomizer = ({ cover, onChange }: CoverCustomizerProps) => {
           <h3 id="cover-settings-title">Настрой обложку</h3>
         </div>
         <span className="cover-customizer__badge">4 шага</span>
+      </div>
+
+      <div className="cover-editor-preview" aria-live="polite">
+        <div className="cover-editor-preview__heading">
+          <span>Предпросмотр</span>
+          <small>так получатель увидит капсулу</small>
+        </div>
+        <MemoryCover cover={cover} count={3} />
       </div>
 
       <div className="cover-control-group">
